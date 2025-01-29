@@ -22,7 +22,7 @@ RED = (255, 0, 0)
 
 fig_types = ['rect', 'circle', 'triangle']
 
-NUM_SWAPS = 10
+NUM_SWAPS = 20
 
 def calc_figure_s_alpha(indx, num_figures):
     return 360 * indx/num_figures
@@ -39,9 +39,13 @@ def gen_level(gears, num_swaps = 1):
             dirr = 1
         elif gear_ind == len(gears) - 1:
             dirr = -1
-        gears[0].rotate(dirr * step)
-        gears[gear_ind].swap_fig(dirr)
-        print(i, ". rotated", dirr * step, "and swaped", gear_ind ,"with", ["left", "right"][(dirr + 1)//2], "gear")
+        
+
+        gears[1].rotate(dirr * step)#TODO: add vertical rotation
+        # gears[gear_ind].swap_fig(dirr)
+        for i in range(1, len(gears) - 1):#TODO: len(gears_h)
+            gears[i].swap_fig('r')#TODO: add vertical swap
+        # print(i, ". rotated", dirr * step, "and swaped", gear_ind ,"with", ["left", "right"][(dirr + 1)//2], "gear")
 
 def check_win(gears):
     for gear in gears:

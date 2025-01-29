@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Literal###################TYPE_CHECKING
 import math
 
@@ -6,47 +6,50 @@ from figure import Figure
 
 @dataclass
 class Gear:
-    indx_gear: int
     num_figures: int
     alpha: float
     figure_type: str
     figures: list[Figure] = None
-    neighbor_l: 'Gear' = None
-    neighbor_r: 'Gear' = None
-    indx_to_swap_l: int = None
-    indx_to_swap_r: int = 0
+    neighbors: dict[str, 'Gear'] = field(default_factory=dict)
+    indx_to_swap: dict[str, int] = field(default_factory=dict)
 
     def __post_init__(self):
         self.figures = [Figure(self.figure_type) for _ in range(self.num_figures)] if self.figures is None else self.figures
-        self.indx_to_swap_l = int(self.num_figures/2)
-        if self.num_figures % 2 == 1:
-            raise ValueError("num_figures must be even to swap figures in boyh dirrections")
+        self.indx_to_swap['r'] = 0
+        self.indx_to_swap['l'] = int(self.num_figures/2)
+        self.indx_to_swap['d'] = int(self.num_figures/4)
+        self.indx_to_swap['u'] = 3 * int(self.num_figures/4)
+        if not self.num_figures % 4 == 0:
+            raise ValueError("num_figures must divide by 4 to swap figures in all dirrections")
+        self.was_rotated = False
 
     def rotate(self, step: int):
         # self.figures = self.figures[-step:] + self.figures[:-step]###################TODO: check is it correct
 
         #or
-
-        self.indx_to_swap_l -= step
-        self.indx_to_swap_r -= step
-        self.indx_to_swap_l %= self.num_figures
-        self.indx_to_swap_r %= self.num_figures
+        for k in self.indx_to_swap:
+            self.indx_to_swap[k] -= step
+            self.indx_to_swap[k] %= self.num_figures
 
         self.alpha += step * 360 / self.num_figures
         self.alpha %= 360
+        self.was_rotated = True
 
-        if not self.neighbor_r is None:
-            self.neighbor_r.rotate(-step)
+        for d in ['r', 'l', 'd', 'u']:
+            if d in self.neighbors and not self.neighbors[d].was_rotated:
+                self.neighbors[d].rotate(-step)
 
-    def swap_fig(self, dirr: Literal[-1, 1]):
+    def swap_fig(self, dirr: Literal['l', 'r', 'u', 'd']):
         match dirr:
-            case -1:
-                self.figures[self.indx_to_swap_l], self.neighbor_l.figures[self.neighbor_l.indx_to_swap_r] = \
-                    self.neighbor_l.figures[self.neighbor_l.indx_to_swap_r], self.figures[self.indx_to_swap_l]
-            case 1:
-                self.figures[self.indx_to_swap_r], self.neighbor_r.figures[self.neighbor_r.indx_to_swap_l] = \
-                    self.neighbor_r.figures[self.neighbor_r.indx_to_swap_l], self.figures[self.indx_to_swap_r]
-                y_ = 0
+            case 'l':
+                self.figures[self.indx_to_swap['l']], self.neighbors['l'].figures[self.neighbors['l'].indx_to_swap['r']] = \
+                    self.neighbors['l'].figures[self.neighbors['l'].indx_to_swap['r']], self.figures[self.indx_to_swap['l']]
+            case 'r':
+                self.figures[self.indx_to_swap['r']], self.neighbors['r'].figures[self.neighbors['r'].indx_to_swap['l']] = \
+                    self.neighbors['r'].figures[self.neighbors['r'].indx_to_swap['l']], self.figures[self.indx_to_swap['r']]
+            case 'd':
+                self.figures[self.indx_to_swap['d']], self.neighbors['d'].figures[self.neighbors['d'].indx_to_swap['u']] = \
+                    self.neighbors['d'].figures[self.neighbors['d'].indx_to_swap['u']], self.figures[self.indx_to_swap['d']]
 
 
     

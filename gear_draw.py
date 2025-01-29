@@ -9,7 +9,6 @@ from utils import *
 @dataclass
 class Gear_draw:
     gear: Gear
-    figure_type: str
     x: int
     y: int
 
@@ -28,7 +27,7 @@ class Gear_draw:
 
     def draw_gear(self, surface):
         angle, x, y = self.gear.alpha, self.x, self.y
-        hole_type = self.figure_type
+        hole_type = self.gear.figure_type
         """Рисует шестерёнку с объёмным эффектом и отверстием."""
         points = []
         for i in range(0, 360, 40):
@@ -63,6 +62,7 @@ class Gear_draw:
     def draw(self, surface):
         self.update_d_fig()
         self.update_fig_pos()
+        self.gear.was_rotated = False
         points = self.draw_gear(surface)
         for i, d_figure in enumerate(self.d_figures):
             d_figure.draw_figure(surface)
